@@ -153,7 +153,6 @@ public class main {
 //            }
 
 //          Useless switch....
-//          System.out.println(String.format("%s: %s", parts[1], parts[2]));
 
             switch (parts[1]){
                 case "STN":

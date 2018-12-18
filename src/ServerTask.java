@@ -1,7 +1,10 @@
+import javax.xml.stream.FactoryConfigurationError;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.Socket;
+import java.nio.file.FileAlreadyExistsException;
+import java.util.ArrayList;
 
 // Handles server functions
 public class ServerTask extends Thread {
@@ -25,17 +28,47 @@ public class ServerTask extends Thread {
         try {
             BufferedReader reader = new BufferedReader(new InputStreamReader(socket.getInputStream()));
 
+            // Create data container
+            ArrayList<String> measurementData = new ArrayList<>();
+            boolean isReading = false;
+
             while(true){
+
+
                 // Read line
                 String input = reader.readLine(); // remove spaces
-                System.out.println("CUR LINE: " + input);
+                //System.out.println("CUR LINE: " + input);
+
                 // No input
                 if(input == null){
                     break;
                 }
 
-            }
+                // Remove spaces
+                input = input.replaceAll("\\s","");
+                System.out.println(input);
 
+                if(!isReading){
+                    // Look for Measurement start
+                    if(input.equals("<MEASUREMENT>")){
+                        isReading = true;
+                        System.out.println("Start reading");
+                    }
+                }else if(isReading ){
+                    if(input.equals("</MEASUREMENT>")){
+                        // Done reading!
+                        System.out.println("Done reading");
+                        break;
+
+                        // isReading = false;
+                        // handle current measurement and reset it
+                    }else{
+
+                    }
+
+
+                }
+            }
 
         } catch (IOException e) {
             System.out.println("Error handling client ");

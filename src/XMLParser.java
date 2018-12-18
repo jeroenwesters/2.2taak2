@@ -10,6 +10,20 @@ public class XMLParser {
 //                System.out.println("Part: " + i + "  -  " + parts[i]);
 //            }
 
+
+        for (int i = 1; i < parts.length; i++){
+            System.out.println("ID " + parts[i]);
+
+            if(parts[i].equals("")){
+                for (int x = 0; x < 1000; x++){
+                    System.out.println("MISSING VARIABLE ");
+
+                }
+            }
+        }
+
+
+
         switch (parts[1]){
             case "STN":
                 System.out.println("STN: " + parts[2]);

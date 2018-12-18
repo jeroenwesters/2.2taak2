@@ -1,9 +1,13 @@
+import model.Measurement;
+
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.ServerSocket;
 import java.net.Socket;
-
+import java.sql.Date;
+import java.sql.Time;
+import java.util.ArrayList;
 
 
 /**
@@ -85,11 +89,11 @@ public class main {
 
                 boolean start_file = false;
                 boolean start_measuring = false;
+                ArrayList<String> measurementData = new ArrayList<>();
 
                 while (true) {
                     // Read line
                     String input = in.readLine(); // remove spaces
-
                     // No input
                     if(input == null){
                         break;
@@ -130,17 +134,21 @@ public class main {
                             if (input.equals("</MEASUREMENT>")) { // End measurement
                                 start_measuring = false;
                             }else{
-
+                                //System.out.println(input.split("[<|>]")[2]);
+//                                String data = input.split("[<|>]")[2];
+//                                measurementData.add("".equals(data) ? "0.0" : data);
+//                                if(measurementData.size() == 14) {
+//                                    Measurement.fromData(measurementData).print();
+//                                    measurementData = new ArrayList<>();
+//                                }
                                 ParseData(input);
                             }
-
-
-
                         }
 
                        if (input.equals("</WEATHERDATA>")){ // End command
                             System.out.println("End of file");
-                            System.out.println(getCount());
+
+                           System.out.println(getCount());
 
                             start_file = false;
                             //break; <-- cancels the program!
@@ -168,9 +176,11 @@ public class main {
 //                System.out.println("Part: " + i + "  -  " + parts[i]);
 //            }
 
+//          Useless switch....
+//          System.out.println(String.format("%s: %s", parts[1], parts[2]));
+
             switch (parts[1]){
                 case "STN":
-                    System.out.println("STN: " + parts[2]);
                     break;
 
                 case "DATE":

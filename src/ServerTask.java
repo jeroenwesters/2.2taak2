@@ -1,7 +1,13 @@
+import model.Measurement;
+
+import javax.xml.stream.FactoryConfigurationError;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.Socket;
+import java.nio.file.FileAlreadyExistsException;
+import java.util.ArrayList;
+import java.util.List;
 
 // Handles server functions
 public class ServerTask extends Thread {
@@ -25,22 +31,80 @@ public class ServerTask extends Thread {
         try {
             BufferedReader reader = new BufferedReader(new InputStreamReader(socket.getInputStream()));
 
+            // Create data container
+            List<String> measurementData = new ArrayList<>();
+            boolean isReading = false;
+
             while(true){
+
+
                 // Read line
                 String input = reader.readLine(); // remove spaces
-                System.out.println("CUR LINE: " + input);
+                //System.out.println("CUR LINE: " + input);
+
                 // No input
                 if(input == null){
                     break;
                 }
 
-            }
+                // Remove spaces
+                input = input.replaceAll("\\s","");
+                //System.out.println(input);
 
+                if(!isReading){
+                    // Look for Measurement start
+                    if(input.equals("<MEASUREMENT>")){
+                        // Clear measurements!
+                        measurementData = new ArrayList<>();
+
+                        isReading = true;
+                        //System.out.println("Start reading");
+                    }
+                }else if(isReading ){
+                    if(input.equals("</MEASUREMENT>")){
+                        // Done reading!
+                        isReading = false;
+
+                        //System.out.println("Done reading");
+
+                        // Give data to !?
+                        Measurement m = Measurement.fromData(measurementData);
+
+                        //m.print();
+
+                        // DEBUG
+                        // break;
+
+                        // isReading = false;
+                        // handle current measurement and reset it
+                    }else{
+                        // Add data!
+
+                        // Check for zero string
+                        String[] data = parser.ParseData(input);
+
+
+                        for (int i = 0; i < data.length; i++){
+                            if(data[i].equals("")){
+                                data[i] = "0";
+                            }
+                        }
+
+
+                        measurementData.add(data[2]);
+
+                    }
+
+
+                }
+            }
 
         } catch (IOException e) {
             System.out.println("Error handling client ");
         } finally {
             try {
+                System.out.println("Closing socket");
+
                 socket.close();
             } catch (IOException e) {
                 System.out.println("Couldn't close socket");
@@ -97,57 +161,6 @@ public class ServerTask extends Thread {
                 }
             }
         }
-
-
-
-        switch (data[1]){
-            case "STN":
-                System.out.println("STN: " + data[2]);
-                break;
-            case "DATE":
-                System.out.println("Date: " + data[2]);
-                break;
-            case "TIME":
-                System.out.println("TIME: " + data[2]);
-                break;
-            case "TEMP":
-                System.out.println("TEMP: " + data[2]);
-                break;
-            case "DEWP":
-                System.out.println("DEWP: " + data[2]);
-                break;
-            case "STP":
-                System.out.println("STP: " + data[2]);
-                break;
-            case "SLP":
-                System.out.println("SLP: " + data[2]);
-                break;
-            case "VISIB":
-                System.out.println("VISIB: " + data[2]);
-                break;
-            case "WDSP":
-                System.out.println("WDSP: " + data[2]);
-                break;
-            case "PRCP":
-                System.out.println("PRCP: " + data[2]);
-                break;
-            case "SNDP":
-                System.out.println("SNDP: " + data[2]);
-                break;
-            case "FRSHTT":
-                System.out.println("FRSHTT: " + data[2]);
-                break;
-            case "CLDC":
-                System.out.println("CLDC: " + data[2]);
-                break;
-            case "WNDDIR":
-                System.out.println("WNDDIR: " + data[2]);
-                break;
-            default:
-                System.out.println("ERROR");
-                break;
-        }
-
 
             /*
 

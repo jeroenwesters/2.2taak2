@@ -69,7 +69,7 @@ public class Server {
 
                 }else{
                     // Debug the amount
-                    System.out.println("Client count is now: " + clientCount);
+                    // System.out.println("Client count is now: " + clientCount);
                 }
             }
         }

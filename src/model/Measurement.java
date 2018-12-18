@@ -7,24 +7,20 @@ import java.util.List;
 
 public class Measurement {
 
-    int stationNumber;
-    Date date;
-    Time time;
-    float temperature;
-    float dewPoint;
-    float stp;
-    float slp;
-    float visibility;
-    float windSpeed;
-    float precipitate;
-    float snow;
-    int frshtt;
-    float cloudsPercentage;
-    int windDirection;
-
-    private Measurement() {
-
-    }
+    private int stationNumber;
+    private Date date;
+    private Time time;
+    private float temperature;
+    private float dewPoint;
+    private float stp;
+    private float slp;
+    private float visibility;
+    private float windSpeed;
+    private float precipitate;
+    private float snow;
+    private int frshtt;
+    private float cloudsPercentage;
+    private int windDirection;
 
     private Measurement(int stationNumber, Date date, Time time, float temperature, float dewPoint, float stp,
                         float slp, float visibility, float windSpeed, float precipitate, float snow, int frshtt,
@@ -46,24 +42,14 @@ public class Measurement {
     }
 
     public static Measurement fromData(List<String> data) {
-        System.out.print(data.size());
-        Measurement measurement = new Measurement();
-        measurement.setStationNumber(Integer.getInteger(data.get(0)));
-        measurement.setDate(Date.valueOf(data.get(1)));
-        measurement.setTime(Time.valueOf(data.get(2)));
-        measurement.setTemperature(Float.parseFloat(data.get(3)));
-        measurement.setDewPoint(Float.parseFloat(data.get(4)));
-        measurement.setStp(Float.parseFloat(data.get(5)));
-        measurement.setSlp(Float.parseFloat(data.get(6)));
-        measurement.setVisibility(Float.parseFloat(data.get(7)));
-        measurement.setWindSpeed(Float.parseFloat(data.get(8)));
-        measurement.setPrecipitate(Float.parseFloat(data.get(9)));
-        measurement.setSnow(Float.parseFloat(data.get(10)));
-        measurement.setFrshtt(Integer.getInteger(data.get(11)));
-        measurement.setCloudsPercentage(Float.parseFloat(data.get(12)));
-        measurement.setWindDirection(Integer.getInteger(data.get(13)));
-
-        return measurement;
+        return new Measurement(Integer.parseInt(data.get(0)),
+                Date.valueOf(data.get(1)), Time.valueOf(data.get(2)),
+                Float.parseFloat(data.get(3)), Float.parseFloat(data.get(4)),
+                Float.parseFloat(data.get(5)), Float.parseFloat(data.get(6)),
+                Float.parseFloat(data.get(7)), Float.parseFloat(data.get(8)),
+                Float.parseFloat(data.get(9)), Float.parseFloat(data.get(10)),
+                Integer.parseInt(data.get(11)), Float.parseFloat(data.get(12)),
+                Integer.parseInt(data.get(13)));
     }
 
     public int getStationNumber() {

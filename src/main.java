@@ -106,7 +106,7 @@ public class main {
                     // Start command
                     if (input.equals("<WEATHERDATA>")){
                         if(!start_file){
-                            System.out.println("Start of file");
+//                            System.out.println("Start of file");
                             start_file = true;
                         }else{
                             System.out.println("Error occurred, stopping");
@@ -135,18 +135,18 @@ public class main {
                                 start_measuring = false;
                             }else{
                                 //System.out.println(input.split("[<|>]")[2]);
-//                                String data = input.split("[<|>]")[2];
-//                                measurementData.add("".equals(data) ? "0.0" : data);
-//                                if(measurementData.size() == 14) {
-//                                    Measurement.fromData(measurementData).print();
-//                                    measurementData = new ArrayList<>();
-//                                }
-                                ParseData(input);
+                                String data = input.split("[<|>]")[2];
+                                measurementData.add("".equals(data) ? "0.0" : data);
+                                if(measurementData.size() == 14) {
+                                    Measurement.fromData(measurementData).print();
+                                    measurementData = new ArrayList<>();
+                                }
+//                                ParseData(input);
                             }
                         }
 
                        if (input.equals("</WEATHERDATA>")){ // End command
-                            System.out.println("End of file");
+//                            System.out.println("End of file");
 
                            System.out.println(getCount());
 

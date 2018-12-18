@@ -16,6 +16,11 @@ public class Server {
     private static int clientCount = 0;
 
 
+    public Server(int maxAllowedClients){
+        this.maxAllowedClients = maxAllowedClients;
+    }
+
+
     /**
      * not FINISHED
      * Add a client to the counter!
@@ -36,11 +41,10 @@ public class Server {
     /**
      * Start thread
      */
-    public void run(int maxAllowedClients) throws IOException {
+    public void run() throws IOException {
 
         System.out.println(String.format("Server running on port: %d, with max: %d clients", socket_port, maxAllowedClients));
 
-        this.maxAllowedClients = maxAllowedClients;
 
         // Create listener on port X
         ServerSocket listener = new ServerSocket(socket_port);

@@ -1,5 +1,7 @@
+import database.Database;
 import model.Measurement;
 
+import javax.xml.crypto.Data;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -27,6 +29,9 @@ public class main {
      */
     public static void main(String[] args) throws Exception {
         // Create server
+
+        Database database = new Database("root", "root", "localhost", 3306, "unwdmi");
+
         Server server = new Server(10); // 10 clients
 
         // Run server (Could make a thread of it)

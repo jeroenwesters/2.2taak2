@@ -14,6 +14,11 @@ public class ServerTask extends Thread {
     private Socket socket = null;;
     private XMLParser parser = null;
 
+
+    /**
+     * Constructor
+     * @param socket
+     */
     public ServerTask(Socket socket) {
         parser = new XMLParser();
         this.socket = socket;
@@ -35,8 +40,11 @@ public class ServerTask extends Thread {
             List<String> measurementData = new ArrayList<>();
             boolean isReading = false;
 
-            while(true){
+            long startTime = 0;
 
+
+            // Infinite loop to prevent thread from stopping
+            while(true){
 
                 // Read line
                 String input = reader.readLine(); // remove spaces
@@ -51,16 +59,28 @@ public class ServerTask extends Thread {
                 input = input.replaceAll("\\s","");
                 //System.out.println(input);
 
+
+                if(input.equals("<WEATHERDATA>")){
+                    // Start of file
+                    startTime = System.nanoTime();
+                }else if (input.equals("</WEATHERDATA>")){
+                    // End of file
+                    stopTimer("Measurement", startTime);
+
+                }
+
+
                 if(!isReading){
                     // Look for Measurement start
                     if(input.equals("<MEASUREMENT>")){
                         // Clear measurements!
-                        measurementData = new ArrayList<>();
+                        measurementData.clear();
 
+                        // Start reading the file
                         isReading = true;
-                        //System.out.println("Start reading");
                     }
                 }else if(isReading ){
+                    // If it is the end of a measurement
                     if(input.equals("</MEASUREMENT>")){
                         // Done reading!
                         isReading = false;
@@ -70,32 +90,27 @@ public class ServerTask extends Thread {
                         // Give data to !?
                         Measurement m = Measurement.fromData(measurementData);
 
+                        // DEBUG:: Print all measured data to console.
                         //m.print();
 
-                        // DEBUG
-                        // break;
-
-                        // isReading = false;
-                        // handle current measurement and reset it
+                        // DEBUG    break;
                     }else{
-                        // Add data!
+                        // Convert string (to get variable)
+                        //String[] data = parser.ParseData(input);
+                        String data = parser.ParseData(input);
 
-                        // Check for zero string
-                        String[] data = parser.ParseData(input);
 
+                        // Check for zero value
 
-                        for (int i = 0; i < data.length; i++){
-                            if(data[i].equals("")){
-                                data[i] = "0";
-                            }
+                        if(data.equals("")){
+                            //System.out.println("MISSING VALUE" + data);
+                            data = "0";
+                        }else{
+                            //System.out.println("Good data: " + data);
                         }
 
-
-                        measurementData.add(data[2]);
-
+                        measurementData.add(data);
                     }
-
-
                 }
             }
 
@@ -112,40 +127,16 @@ public class ServerTask extends Thread {
         }
 
 
-
-        // Infinite loop, to keep the thread alive.
-        while (true) {
-//            try
-//            {
-//                // Debug
-//                Thread.sleep(1000);
-//
-//
-//            }
-//            catch (InterruptedException ex) {
-//                System.out.println("Exception encounterted");
-//            }
-//
-//            System.out.println(Thread.currentThread().getName() +
-//                    " finished executing");
-//
-//            Server.RemoveClient();
-//            break;
-
-
-            // Read line
-            //
-
-            // When closing: Server.RemoveClient();
-
-
-
-
-
-
-        }
     }
 
+
+    private void stopTimer(String desc, long startTime){
+        long stopTime = (System.nanoTime() - startTime);
+
+        double sec = (double)stopTime / 1000000000;
+
+        System.out.println(String.format("%s timer stopped after: %f seconds", desc, sec));
+    }
 
 
     private void HandleData(String[] data){

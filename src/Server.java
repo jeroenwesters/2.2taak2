@@ -60,7 +60,9 @@ public class Server {
 
                     AddClient();
                     // Debug line, to see how many clients there are
-                    System.out.println(String.format("Socket created, client count: %d", clientCount));
+                    if(clientCount % 100 == 0){
+                        System.out.println(String.format("Client count: >= %d", clientCount));
+                    }
 
                     // Create thread with it's socket as parameter!
                     ServerTask s_task = new ServerTask(socket);

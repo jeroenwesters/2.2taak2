@@ -1,18 +1,45 @@
 import model.Measurement;
 
-import javax.xml.stream.FactoryConfigurationError;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.Socket;
-import java.nio.file.FileAlreadyExistsException;
 import java.util.ArrayList;
 import java.util.List;
 
+
+
 // Handles server functions
 public class ServerTask extends Thread {
+
+    // Generator settings (amount of stations and measurements)
+    private final int amount_stations = 10;
+    private  final int amount_measurements = 14;
+    private  final int max_backlog = 30; // Amount of saved values
+
     private Socket socket = null;;
     private XMLParser parser = null;
+
+
+    // Multidimensional array containing stations, measurements and data
+    String stationData[][][] = new String[amount_stations][amount_measurements][max_backlog];
+    int currentStation = 0;
+    int currentMeasurement = 0;
+    int currentBacklog = 0;
+
+
+//    int values_avarage[] = {
+//            3,  // temp
+//    };
+
+    private final int use_previous[] = {
+            0,
+            1,
+            2,
+            13,
+    };
+
+    private final int temp_id = 3;
 
 
     /**
@@ -42,13 +69,19 @@ public class ServerTask extends Thread {
             boolean fileStart = false;
             boolean isReading = false;
 
-
             long startTime = 0;
 
             String input = "";
 
+
+
+
+
+
             // Infinite loop to prevent thread from stopping
             while(true){
+
+                //System.out.println(stationData[0][0][0]);
 
                 // Read line
                 input = reader.readLine(); // remove spaces
@@ -67,6 +100,7 @@ public class ServerTask extends Thread {
                 if(input.equals("<WEATHERDATA>")){
                     startTime = System.nanoTime();
                     fileStart = true;
+                    currentStation = 0;
 
                 }else if (input.equals("</WEATHERDATA>")){
                     // End of file
@@ -89,31 +123,74 @@ public class ServerTask extends Thread {
                 }else if(isReading ){
                     // If it is the end of a measurement
                     if(input.equals("</MEASUREMENT>")){
+                        currentStation++;
+                        currentMeasurement = 0;
+
+
                         // Done reading!
                         isReading = false;
 
                         //System.out.println("Done reading");
 
                         // Give data to !?
-                        Measurement m = Measurement.fromData(measurementData);
+                        //Measurement m = Measurement.fromData(measurementData);
 
                         //m.print();
                     }else{
                         // Convert string (to get variable)
                         //String[] data = parser.ParseData(input);
                         String data = parser.ParseData(input); // Change the 1 !!!
+                        //System.out.println(data);
 
 
                         // Check for zero value
-
                         if(data.equals("")){
-                            //System.out.println("MISSING VALUE" + data);
-                            data = "0";
-                        }else{
-                            //System.out.println("Good data: " + data);
+                            boolean usePrevious = false;
+
+                            // No data, check if we can use previous data:
+                            for(int d = 0; d < use_previous.length; d++){
+                                if(currentMeasurement == use_previous[d]){
+                                    // Todo:
+                                    // use previous data
+                                    usePrevious = true;
+                                }
+                            }
+
+                            if(usePrevious){
+                                // Todo: get old value
+                                data = "My OLD VALUE";
+
+                            }else{
+                                // Todo: calculate avarage
+                                data = "My AVARAGE VALUE";
+                            }
+
                         }
 
+
+                        if(currentMeasurement == temp_id){
+                            //System.out.println("Temperature data: " + data);
+
+                            // Todo: Check for max 20% difference
+                            // For now:
+                            stationData[currentStation][currentMeasurement][currentBacklog] = data;
+
+                        }else{
+                            // Todo: assign the data
+                            //System.out.println(currentMeasurement + " - data: " + data);
+
+                            stationData[currentStation][currentMeasurement][currentBacklog] = data;
+
+                        }
+
+                        //System.out.println(stationData[currentStation][currentMeasurement][currentBacklog]);
+                        currentMeasurement++;
+
                         measurementData.add(data);
+
+                        if(currentMeasurement > 13){
+                            //break;
+                        }
                     }
                 }
 
@@ -142,7 +219,21 @@ public class ServerTask extends Thread {
     }
 
 
-    private String CorrectMissingData(String[] oldValues, String input){
+    private String CorrectMissingData(String data[][][], int Station, int measurement, int dataIndex, String input){
+
+
+        // Fill each row with 1.0
+        for (int sd = 0; sd < stationData.length; sd++){
+            System.out.println();
+            System.out.print(sd);
+            System.out.print(": ");
+
+            for(int md = 0; md < stationData[sd].length; md++){
+                System.out.print("..");
+                System.out.print(md);
+
+            }
+        }
 
         return null;
     }

@@ -23,7 +23,7 @@ public class ServerTask extends Thread {
         parser = new XMLParser();
         this.socket = socket;
 
-        System.out.println(String.format("New thread started"));
+        //System.out.println(String.format("New thread started"));
 
     }
 
@@ -62,10 +62,11 @@ public class ServerTask extends Thread {
 
                 if(input.equals("<WEATHERDATA>")){
                     // Start of file
-                    startTime = System.nanoTime();
+                    //startTime = System.nanoTime();
+
                 }else if (input.equals("</WEATHERDATA>")){
                     // End of file
-                    stopTimer("Measurement", startTime);
+                    //stopTimer("Measurement", startTime);
 
                 }
 
@@ -118,7 +119,7 @@ public class ServerTask extends Thread {
             System.out.println("Error handling client ");
         } finally {
             try {
-                System.out.println("Closing socket");
+                //System.out.println("Closing socket");
 
                 socket.close();
             } catch (IOException e) {

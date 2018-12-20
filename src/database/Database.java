@@ -1,5 +1,7 @@
 package database;
 
+import model.Measurement;
+
 import java.sql.*;
 import java.util.Properties;
 
@@ -59,36 +61,52 @@ public class Database {
     private void createMeasurementsTable() {
         try {
             stmt = conn.createStatement();
-            String sql = "DROP TABLE IF EXISTS `measurements`" +
-                    "CREATE TABLE `stations` (\n" +
-                    "  `stn` int(10) unsigned NOT NULL,\n" +
-                    "  `name` varchar(64) NOT NULL,\n" +
-                    "  `country` varchar(64) NOT NULL,\n" +
-                    "  `latitude` double NOT NULL,\n" +
-                    "  `longitude` double NOT NULL,\n" +
-                    "  `elevation` double NOT NULL,\n" +
-                    "  PRIMARY KEY (`stn`)\n" +
-                    ")";
-            boolean success = stmt.execute(sql);
-
-            if(success) {
-                System.out.println("Created Measurements table");
-            }
+            String createSql = "CREATE TABLE IF NOT EXISTS MEASUREMENTS " +
+                    "(id INTEGER not NULL, " +
+                    " station_number INTEGER not NULL, " +
+                    " date DATE not NULL, " +
+                    " time TIME not NULL, " +
+                    " temperature FLOAT, " +
+                    " dew_point FLOAT, " +
+                    " stp FLOAT, " +
+                    " slp FLOAT, " +
+                    " visibility FLOAT, " +
+                    " wind_speed FLOAT, " +
+                    " precipitate FLOAT, " +
+                    " snow FLOAT, " +
+                    " frshtt INTEGER, " +
+                    " clouds_percentage FLOAT, " +
+                    " wind_direction INTEGER, " +
+                    " PRIMARY KEY ( id ))";
+            stmt.execute(createSql);
         } catch (SQLException e) {
             e.printStackTrace();
         }
     }
 
-    private void testParse() {
+    public void insertMeasurement(Measurement m) {
         try {
-            stmt = conn.createStatement();
-            String sql = "SELECT * FROM stations LIMIT 5";
-            ResultSet rs = stmt.executeQuery(sql);
+            String sql = "INSERT INTO MEASUREMENTS " +
+                    "VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)";
+            PreparedStatement stmt = conn.prepareStatement(sql);
+            stmt.setInt(1,1);
+            stmt.setInt(2, m.getStationNumber());
+            stmt.setDate(3, m.getDate());
+            stmt.setTime(4, m.getTime());
+            stmt.setFloat(5, m.getTemperature());
+            stmt.setFloat(6, m.getDewPoint());
+            stmt.setFloat(7, m.getStp());
+            stmt.setFloat(8, m.getSlp());
+            stmt.setFloat(9, m.getVisibility());
+            stmt.setFloat(10, m.getWindSpeed());
+            stmt.setFloat(11, m.getPrecipitate());
+            stmt.setFloat(12, m.getSnow());
+            stmt.setInt(13, m.getFrshtt());
+            stmt.setFloat(14, m.getCloudsPercentage());
+            stmt.setInt(15, m.getWindDirection());
 
-            while(rs.next()){
-                String name = rs.getString("name");
-                System.out.println(name);
-            }
+            stmt.executeUpdate();
+            stmt.close();
         } catch (SQLException e) {
             e.printStackTrace();
         }

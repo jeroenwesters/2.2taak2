@@ -1,6 +1,5 @@
 package database;
 
-import java.io.IOException;
 import java.sql.*;
 import java.util.Properties;
 
@@ -58,6 +57,29 @@ public class Database {
     }
 
     private void createMeasurementsTable() {
+        try {
+            stmt = conn.createStatement();
+            String sql = "DROP TABLE IF EXISTS `measurements`" +
+                    "CREATE TABLE `stations` (\n" +
+                    "  `stn` int(10) unsigned NOT NULL,\n" +
+                    "  `name` varchar(64) NOT NULL,\n" +
+                    "  `country` varchar(64) NOT NULL,\n" +
+                    "  `latitude` double NOT NULL,\n" +
+                    "  `longitude` double NOT NULL,\n" +
+                    "  `elevation` double NOT NULL,\n" +
+                    "  PRIMARY KEY (`stn`)\n" +
+                    ")";
+            boolean success = stmt.execute(sql);
+
+            if(success) {
+                System.out.println("Created Measurements table");
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
+
+    private void testParse() {
         try {
             stmt = conn.createStatement();
             String sql = "SELECT * FROM stations LIMIT 5";

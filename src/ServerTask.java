@@ -38,35 +38,41 @@ public class ServerTask extends Thread {
 
             // Create data container
             List<String> measurementData = new ArrayList<>();
+
+            boolean fileStart = false;
             boolean isReading = false;
+
 
             long startTime = 0;
 
+            String input = "";
 
             // Infinite loop to prevent thread from stopping
             while(true){
 
                 // Read line
-                String input = reader.readLine(); // remove spaces
+                input = reader.readLine(); // remove spaces
                 //System.out.println("CUR LINE: " + input);
 
                 // No input
                 if(input == null){
+                    System.out.println("No input received, canceling");
                     break;
                 }
 
                 // Remove spaces
                 input = input.replaceAll("\\s","");
-                //System.out.println(input);
 
-
+                // Check if the file starts or ends!
                 if(input.equals("<WEATHERDATA>")){
-                    // Start of file
-                    //startTime = System.nanoTime();
+                    startTime = System.nanoTime();
+                    fileStart = true;
 
                 }else if (input.equals("</WEATHERDATA>")){
                     // End of file
-                    //stopTimer("Measurement", startTime);
+                    fileStart = false;
+                    stopTimer("Measurement", startTime);
+                }else{
 
                 }
 
@@ -91,14 +97,11 @@ public class ServerTask extends Thread {
                         // Give data to !?
                         Measurement m = Measurement.fromData(measurementData);
 
-                        // DEBUG:: Print all measured data to console.
                         //m.print();
-
-                        // DEBUG    break;
                     }else{
                         // Convert string (to get variable)
                         //String[] data = parser.ParseData(input);
-                        String data = parser.ParseData(input);
+                        String data = parser.ParseData(input); // Change the 1 !!!
 
 
                         // Check for zero value
@@ -113,8 +116,9 @@ public class ServerTask extends Thread {
                         measurementData.add(data);
                     }
                 }
-            }
 
+                input = "";
+            }
         } catch (IOException e) {
             System.out.println("Error handling client ");
         } finally {
@@ -126,8 +130,6 @@ public class ServerTask extends Thread {
                 System.out.println("Couldn't close socket");
             }
         }
-
-
     }
 
 
@@ -140,8 +142,13 @@ public class ServerTask extends Thread {
     }
 
 
-    private void HandleData(String[] data){
+    private String CorrectMissingData(String[] oldValues, String input){
 
+        return null;
+    }
+
+
+    private void HandleData(String[] data){
 
         for (int i = 1; i < data.length; i++){
             System.out.println("ID " + data[i]);

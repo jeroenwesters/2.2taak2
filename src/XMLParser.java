@@ -12,6 +12,9 @@ public class XMLParser {
     // Named pattern
     Pattern regex = Pattern.compile("(>)(?<value>.*)(<)", Pattern.MULTILINE);
 
+    // Named pattern + group
+    //Pattern regex = Pattern.compile("(<)(?<tag>.*)(>)(?<value>.*)(<)", Pattern.MULTILINE);
+
     public  XMLParser(){
 
     }
@@ -29,18 +32,26 @@ public class XMLParser {
             //return m.group(2); // Return value by index
 
 
-            // Return value by name
-            return m.group("value"); // Return value
+            // Prepare result
+            //result[0] = m.group("tag");     // Assign tag
+            return m.group("value");   // Assign value
 
 
         }else{
-            System.out.println("No MATCH FOUND:");
+            System.out.println("No MATCH FOUND, using fall back system:");
 
             // Split manual:
             String[] parts = input.split("[<>]");
 
-            // Return value
-            return parts[2];
+            if(parts.length > 2){
+                System.out.println(parts[1]);
+
+                //result[0] = parts[1];     // Assign tag
+                return parts[2];   // Assign value
+            }
         }
+
+        // Missing
+        return "";
     }
 }

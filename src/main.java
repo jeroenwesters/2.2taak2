@@ -15,7 +15,7 @@ public class main {
      */
     public static void main(String[] args) throws Exception {
         // Create server
-        Database db = new Database("root", "root", "localhost", 3306, "unwdmi");
+        Database db = new Database("root", "", "localhost", 3306, "unwdmi");
 //        List<String> data = new ArrayList<>();
 //        data.add("118550");
 //        data.add("2018-12-20");

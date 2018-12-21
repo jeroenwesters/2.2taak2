@@ -44,7 +44,12 @@ public class Database {
             connectionProps.put("user", this.username);
             connectionProps.put("password", this.password);
             Class.forName("com.mysql.jdbc.Driver");
-            conn = DriverManager.getConnection("jdbc:mysql://" + this.serverName + ":" + this.portNumber + "/" + this.dbName, connectionProps);
+            conn = DriverManager.getConnection("jdbc:mysql://" + this.serverName + ":" + this.portNumber + "/" + this.dbName + "?useJDBCCompliantTimezoneShift=true&useLegacyDatetimeCode=false&serverTimezone=UTC", connectionProps);
+
+
+            // jdbc:mysql://localhost/portfolio?useUnicode=true&useJDBCCompliantTimezoneShift=true&useLegacyDatetimeCode=false&serverTimezone=UTC
+
+
             if (conn != null) {
                 System.out.println("Successfully connected to MySQL database test");
             }

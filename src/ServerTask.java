@@ -102,10 +102,16 @@ public class ServerTask extends Thread {
                     fileStart = true;
                     currentStation = 0;
 
+
                 }else if (input.equals("</WEATHERDATA>")){
                     // End of file
                     fileStart = false;
                     stopTimer("Measurement", startTime);
+                    currentBacklog++;
+
+                    if(currentBacklog >= max_backlog){
+                        currentBacklog = 0;
+                    }
                 }else{
 
                 }
@@ -159,6 +165,7 @@ public class ServerTask extends Thread {
                             if(usePrevious){
                                 // Todo: get old value
                                 data = "My OLD VALUE";
+                                data = CorrectMissingData(stationData, currentStation, currentMeasurement, currentBacklog);
 
                             }else{
                                 // Todo: calculate avarage
@@ -172,9 +179,23 @@ public class ServerTask extends Thread {
                             //System.out.println("Temperature data: " + data);
 
                             // Todo: Check for max 20% difference
-                            // For now:
-                            stationData[currentStation][currentMeasurement][currentBacklog] = data;
+                            // Previous data:
+                            int prev = currentBacklog - 1;
+                            if(prev < 0){
+                                prev = max_backlog - 1;
+                            }
 
+                            // Todo: Move offset 20 to other place!
+                            // Validates data on given thresh hold
+                            if(validateData(stationData, currentStation, currentMeasurement, data, prev, 20)){
+                                //System.out.println("Temp within 20% offset, Valid!");
+                                stationData[currentStation][currentMeasurement][currentBacklog] = data;
+
+                            }else{
+                                // Todo: Data invalid, correct the data with e
+
+                                stationData[currentStation][currentMeasurement][currentBacklog] = data;
+                            }
                         }else{
                             // Todo: assign the data
                             //System.out.println(currentMeasurement + " - data: " + data);
@@ -184,13 +205,28 @@ public class ServerTask extends Thread {
                         }
 
                         //System.out.println(stationData[currentStation][currentMeasurement][currentBacklog]);
-                        currentMeasurement++;
-
                         measurementData.add(data);
 
-                        if(currentMeasurement > 13){
+                        // Todo: Remove those lines, DEBUGGING PURPOSES
+                        if(currentMeasurement == 3 && currentStation == 100){
                             //break;
+                            //System.out.println(currentMeasurement + "Getting data from array: " + stationData[currentStation][currentMeasurement][currentMeasurement]);
+                            System.out.println(" ");
+                            System.out.print("Backlog Values: ");
+                            // Get temperature!!
+                            for(int cb = 0; cb < stationData[currentStation][temp_id].length; cb++){
+                                //System.out.println(currentMeasurement + "Getting data from array: " + stationData[currentStation][currentMeasurement][cb]);
+
+
+                                 System.out.print(stationData[currentStation][temp_id][cb] + ", " );
+                            }
+
                         }
+
+
+
+                        // Increment current data
+                        currentMeasurement++;
                     }
                 }
 
@@ -219,16 +255,84 @@ public class ServerTask extends Thread {
     }
 
 
-    private String CorrectMissingData(String data[][][], int Station, int measurement, int dataIndex, String input){
+    /**
+     * Validate data
+     * Checks if new data is within offset range (in %)
+     */
+    private boolean validateData(String data[][][], int station, int measurement, String newValue, int prevValueIndex, int maxOffset){
+
+        // Old value
+        // Een meetwaarde voor de temperatuur wordt als irreëel beschouwd indien ze
+        // 20% of meer groter is of kleiner is dan wat men kan verwachten op basis van
+        // extrapolatie van de dertig voorafgaande temperatuurmetingen. In dat geval
+        // wordt de geëxtrapoleerde waarde ± 20% voor de temperatuur opgeslagen.
+        // Voor de andere meetwaarden wordt deze handelswijze niet toegepast.
 
 
-        // Fill each row with 1.0
-        for (int sd = 0; sd < stationData.length; sd++){
+        // Check if the old value was NULL or EMPTY
+        if(data[station][measurement][prevValueIndex] == null || data[station][measurement][prevValueIndex].equals("")){
+            // If true, cant process this!
+            return true;
+        }else{
+            // Check if the new vaue is within the OFFSET threshold
+
+
+            // Todo: validate data
+            // Todo: Fix this data
+
+
+            //New value
+            float curValue = Float.parseFloat(newValue);
+
+            //Old value
+            float oldValue = Float.parseFloat(data[station][measurement][prevValueIndex]);
+
+            // offset (20%) from percent
+            float percent = (oldValue * 0.01f); // 1% = / 100
+
+
+           // System.out.println("Valid: " + newValue + "   Old value " +  oldValue  + "  Offset: " + maxOffset + "   maxDifference: " + percent);
+
+            // If within threshold....
+            // Todo: remove this after fixing calculation!
+            if(true){
+                return true;
+            }
+
+        }
+
+        return false;
+    }
+
+    /*
+    Corrects missing data
+     */
+    private String CorrectMissingData(String data[][][], int station, int measurement, int dataIndex){
+
+        if(station >= 0){
+            System.out.println("This!");
+            return  "";
+        }
+
+        //String value = data[station][measurement][dataIndex] = input;
+
+        // Loop through the backlog:
+        for(int cb = 0; cb < data[station][measurement][dataIndex].length(); cb++){
+            // Get all measurements
+
+            if(data[station][measurement][dataIndex].equals("")){
+                // No data
+            }else{
+                // Calculate...
+            }
+        }
+
+        for (int sd = 0; sd < data.length; sd++){
             System.out.println();
             System.out.print(sd);
             System.out.print(": ");
 
-            for(int md = 0; md < stationData[sd].length; md++){
+            for(int md = 0; md < data[sd].length; md++){
                 System.out.print("..");
                 System.out.print(md);
 

@@ -3,7 +3,10 @@ package database;
 import model.Measurement;
 
 import java.sql.*;
+import java.util.ArrayList;
 import java.util.Properties;
+import java.util.Queue;
+import java.util.concurrent.LinkedTransferQueue;
 
 public class Database {
 
@@ -16,6 +19,7 @@ public class Database {
     private int portNumber;
 
     private Statement stmt = null;
+    private Queue<Measurement> queue;
 
     public Database(String username, String password, String serverName, int portNumber, String dbName) {
         try {
@@ -25,6 +29,7 @@ public class Database {
             this.portNumber = portNumber;
             this.dbName = dbName;
             conn = makeConnection();
+            queue = new LinkedTransferQueue<>();
             createMeasurementsTable();
         }
         catch (SQLException e) {
@@ -43,12 +48,7 @@ public class Database {
             Properties connectionProps = new Properties();
             connectionProps.put("user", this.username);
             connectionProps.put("password", this.password);
-            Class.forName("com.mysql.jdbc.Driver");
             conn = DriverManager.getConnection("jdbc:mysql://" + this.serverName + ":" + this.portNumber + "/" + this.dbName + "?useJDBCCompliantTimezoneShift=true&useLegacyDatetimeCode=false&serverTimezone=UTC", connectionProps);
-
-
-            // jdbc:mysql://localhost/portfolio?useUnicode=true&useJDBCCompliantTimezoneShift=true&useLegacyDatetimeCode=false&serverTimezone=UTC
-
 
             if (conn != null) {
                 System.out.println("Successfully connected to MySQL database test");
@@ -57,8 +57,6 @@ public class Database {
         catch (SQLException ex) {
             System.out.println("An error occurred while connecting MySQL databse");
             ex.printStackTrace();
-        } catch (ClassNotFoundException e) {
-            e.printStackTrace();
         }
         return conn;
     }
@@ -90,26 +88,45 @@ public class Database {
     }
 
     public void insertMeasurement(Measurement m) {
-        try {
-            String sql = "INSERT INTO MEASUREMENTS (station_number, date, time, temperature, dew_point, stp, slp, visibility, wind_speed, precipitate, snow, frshtt, clouds_percentage, wind_direction) " +
-                    "VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?)";
-            PreparedStatement stmt = conn.prepareStatement(sql);
-            stmt.setInt(1, m.getStationNumber());
-            stmt.setDate(2, m.getDate());
-            stmt.setTime(3, m.getTime());
-            stmt.setFloat(4, m.getTemperature());
-            stmt.setFloat(5, m.getDewPoint());
-            stmt.setFloat(6, m.getStp());
-            stmt.setFloat(7, m.getSlp());
-            stmt.setFloat(8, m.getVisibility());
-            stmt.setFloat(9, m.getWindSpeed());
-            stmt.setFloat(10, m.getPrecipitate());
-            stmt.setFloat(11, m.getSnow());
-            stmt.setInt(12, m.getFrshtt());
-            stmt.setFloat(13, m.getCloudsPercentage());
-            stmt.setInt(14, m.getWindDirection());
+        queue.add(m);
+        if(queue.size() >= 30) {
+            insertMeasurements(queue);
+        }
+    }
 
-            stmt.executeUpdate();
+    private void insertMeasurements(Queue<Measurement> queue) {
+        StringBuilder sql = new StringBuilder();
+        int size = queue.size();
+        sql.append("INSERT INTO MEASUREMENTS (station_number, date, time, temperature, dew_point, stp, slp, visibility, wind_speed, precipitate, snow, frshtt, clouds_percentage, wind_direction) VALUES ");
+        for (int i = 0; i < size; i++) {
+            sql.append("(?,?,?,?,?,?,?,?,?,?,?,?,?,?)");
+            if(i < size -1) {
+                sql.append(", ");
+            }
+        }
+        try {
+            PreparedStatement stmt = conn.prepareStatement(sql.toString());
+            long startTime = System.nanoTime();
+            for (int x = 0; x < size; x++) {
+                int offset = x * 14;
+                Measurement m = queue.remove();
+                stmt.setInt(1 + offset, m.getStationNumber());
+                stmt.setDate(2 + offset, m.getDate());
+                stmt.setTime(3 + offset, m.getTime());
+                stmt.setFloat(4 + offset, m.getTemperature());
+                stmt.setFloat(5 + offset, m.getDewPoint());
+                stmt.setFloat(6 + offset, m.getStp());
+                stmt.setFloat(7 + offset, m.getSlp());
+                stmt.setFloat(8 + offset, m.getVisibility());
+                stmt.setFloat(9 + offset, m.getWindSpeed());
+                stmt.setFloat(10 + offset, m.getPrecipitate());
+                stmt.setFloat(11 + offset, m.getSnow());
+                stmt.setInt(12 + offset, m.getFrshtt());
+                stmt.setFloat(13 + offset, m.getCloudsPercentage());
+                stmt.setInt(14 + offset, m.getWindDirection());
+            }
+            stopTimer("Measurement", startTime);
+            stmt.executeLargeUpdate();
             stmt.close();
         } catch (SQLException e) {
             e.printStackTrace();
@@ -141,5 +158,13 @@ public class Database {
             e.printStackTrace();
         }
         return null;
+    }
+
+    private void stopTimer(String desc, long startTime){
+        long stopTime = (System.nanoTime() - startTime);
+
+        double sec = (double)stopTime / 1000000000;
+
+        System.out.println(String.format("%s timer stopped after: %f seconds", desc, sec));
     }
 }

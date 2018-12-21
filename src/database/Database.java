@@ -7,15 +7,15 @@ import java.util.Properties;
 
 public class Database {
 
-    Connection conn;
+    private Connection conn;
 
-    String username;
-    String password;
-    String serverName;
-    String dbName;
-    int portNumber;
+    private String username;
+    private String password;
+    private String serverName;
+    private String dbName;
+    private int portNumber;
 
-    Statement stmt = null;
+    private Statement stmt = null;
 
     public Database(String username, String password, String serverName, int portNumber, String dbName) {
         try {
@@ -62,7 +62,7 @@ public class Database {
         try {
             stmt = conn.createStatement();
             String createSql = "CREATE TABLE IF NOT EXISTS MEASUREMENTS " +
-                    "(id INTEGER not NULL, " +
+                    "(id INTEGER not NULL AUTO_INCREMENT, " +
                     " station_number INTEGER not NULL, " +
                     " date DATE not NULL, " +
                     " time TIME not NULL, " +
@@ -86,29 +86,55 @@ public class Database {
 
     public void insertMeasurement(Measurement m) {
         try {
-            String sql = "INSERT INTO MEASUREMENTS " +
-                    "VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)";
+            String sql = "INSERT INTO MEASUREMENTS (station_number, date, time, temperature, dew_point, stp, slp, visibility, wind_speed, precipitate, snow, frshtt, clouds_percentage, wind_direction) " +
+                    "VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?)";
             PreparedStatement stmt = conn.prepareStatement(sql);
-            stmt.setInt(1,1);
-            stmt.setInt(2, m.getStationNumber());
-            stmt.setDate(3, m.getDate());
-            stmt.setTime(4, m.getTime());
-            stmt.setFloat(5, m.getTemperature());
-            stmt.setFloat(6, m.getDewPoint());
-            stmt.setFloat(7, m.getStp());
-            stmt.setFloat(8, m.getSlp());
-            stmt.setFloat(9, m.getVisibility());
-            stmt.setFloat(10, m.getWindSpeed());
-            stmt.setFloat(11, m.getPrecipitate());
-            stmt.setFloat(12, m.getSnow());
-            stmt.setInt(13, m.getFrshtt());
-            stmt.setFloat(14, m.getCloudsPercentage());
-            stmt.setInt(15, m.getWindDirection());
+            stmt.setInt(1, m.getStationNumber());
+            stmt.setDate(2, m.getDate());
+            stmt.setTime(3, m.getTime());
+            stmt.setFloat(4, m.getTemperature());
+            stmt.setFloat(5, m.getDewPoint());
+            stmt.setFloat(6, m.getStp());
+            stmt.setFloat(7, m.getSlp());
+            stmt.setFloat(8, m.getVisibility());
+            stmt.setFloat(9, m.getWindSpeed());
+            stmt.setFloat(10, m.getPrecipitate());
+            stmt.setFloat(11, m.getSnow());
+            stmt.setInt(12, m.getFrshtt());
+            stmt.setFloat(13, m.getCloudsPercentage());
+            stmt.setInt(14, m.getWindDirection());
 
             stmt.executeUpdate();
             stmt.close();
         } catch (SQLException e) {
             e.printStackTrace();
         }
+    }
+
+    public Measurement getPreviousMeasurement() {
+        try {
+            String sql = "SELECT id FROM MEASUREMENTS ORDER BY id DESC LIMIT 1";
+            ResultSet result = stmt.executeQuery(sql);
+            result.next();
+            int last = result.getInt(1);
+            String previousMeasurementSql = "SELECT * FROM MEASUREMENTS WHERE id = ?";
+            PreparedStatement stmt = conn.prepareStatement(previousMeasurementSql);
+            stmt.setInt(1, last > 30 ? last - 30 : 1);
+            result = stmt.executeQuery();
+            return convertResult(result);
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
+
+    private Measurement convertResult(ResultSet set) {
+        try {
+            set.next();
+            return new Measurement(set.getInt(2), set.getDate(3), set.getTime(4), set.getFloat(5), set.getFloat(6), set.getFloat(7), set.getFloat(8), set.getFloat(9), set.getFloat(10), set.getFloat(11), set.getFloat(12), set.getInt(13), set.getFloat(14), set.getInt(15));
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return null;
     }
 }

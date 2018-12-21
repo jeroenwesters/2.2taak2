@@ -22,9 +22,9 @@ public class Measurement {
     private float cloudsPercentage;
     private int windDirection;
 
-    private Measurement(int stationNumber, Date date, Time time, float temperature, float dewPoint, float stp,
-                        float slp, float visibility, float windSpeed, float precipitate, float snow, int frshtt,
-                        float cloudsPercentage, int windDirection) {
+    public Measurement(int stationNumber, Date date, Time time, float temperature, float dewPoint, float stp,
+                       float slp, float visibility, float windSpeed, float precipitate, float snow, int frshtt,
+                       float cloudsPercentage, int windDirection) {
         this.stationNumber = stationNumber;
         this.date = date;
         this.time = time;
